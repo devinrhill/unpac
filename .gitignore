@@ -1,9 +1,3 @@
-gmx
-roadmap.txt
-*.bfs.*
-CSV_CAR
-*nmm*
-*lzs*
-*arc*
-*.sh
 unpac
+build
+tests
