@@ -1,11 +1,11 @@
 # leave empty for release
-DEBUG :=
+DEBUG := 1
 
 CXX := g++
 CXXFLAGS := -std=c++20 -Iinclude $(if $(DEBUG),-Wall -Wextra -pedantic -g,-O3)
-LDFLAGS := -lfmt -lgiga -lz
+LDFLAGS := -lfmt -lgiga -lm -lraylib
 TARGET := unpac
-MODULES := arcv brres brsar main
+MODULES := arcv brres g03_item_set main
 
 SOURCEDIR := src
 SOURCES := $(foreach MODULE,$(MODULES),$(SOURCEDIR)/$(MODULE).cpp)
@@ -20,6 +20,9 @@ $(OBJECTS): $(OBJECTDIR)/%.o: $(SOURCEDIR)/%.cpp
 
 $(TARGET): $(OBJECTS)
 	$(CXX) $^ $(LDFLAGS) -o $(TARGET)
+
+install: $(TARGET)
+	cp $(TARGET) /usr/bin
 
 clean:
 	rm -f $(OBJECTS) $(TARGET)

@@ -34,9 +34,16 @@ void Arcv::openFile(const std::string& filename, Version version) {
 
             break;
     }
+
+    // Set our filename at the end so we know no errors occured
+    this->setFilename(filename);
 }
 
+// TODO: finish
 void Arcv::readNmbcUncompArcv(giga::Bytestream& bytestream) {
+    (void)bytestream;
+
+    /*
     std::uint32_t memberCount = bytestream.readScalar<std::uint32_t>();
     std::uint32_t uncompFileSize = bytestream.readScalar<std::uint32_t>();
     std::uint32_t compFileSize = bytestream.readScalar<std::uint32_t>();
@@ -59,6 +66,7 @@ void Arcv::readNmbcUncompArcv(giga::Bytestream& bytestream) {
 
         }
     }
+    */
 }
 
 void Arcv::readNmrUncompArcv(giga::Bytestream& bytestream) {
@@ -71,76 +79,78 @@ void Arcv::readNmrUncompArcv(giga::Bytestream& bytestream) {
     if(size < 0x40) { // Empty archive
         return;
     }
-    bytestream.seek(0x10); // Skip
-    std::uint32_t badChecksum = bytestream.readScalar<std::uint32_t>(); // Not sure
 
     bytestream.seek(0x40);
 
+    // Temporary current member metadata variables
     std::uint32_t tmpMemberOffset, tmpMemberSize;
     char tmpMemberName[0x38];
-    giga::Bytestream tmpMemberBytestream;
     std::size_t tmpSeekbackPos;
-    std::vector<std::uint8_t> tmpMemberBuf;
-    for(std::uint32_t i = 0; i < memberCount; i++) {
-        // Reset member metadata variables
-        tmpMemberOffset = 0;
-        tmpMemberSize = 0;
-        std::memset(tmpMemberName, 0, 0x38);
 
-        // Read member metadata
+    this->resize(memberCount);
+    for(std::uint32_t i = 0; i < memberCount; i++) {
+        // Read current member metadata
         tmpMemberOffset = bytestream.readScalar<std::uint32_t>();
         tmpMemberSize = bytestream.readScalar<std::uint32_t>();
+
+        // Read current member filename
         bytestream.read(reinterpret_cast<std::uint8_t*>(tmpMemberName), 0x38);
 
         // Save our position at the next member metadata
         tmpSeekbackPos = bytestream.getPos();
 
-        // Set member filename
-        tmpMemberBytestream.setFilename(tmpMemberName);
+        // Set current member filename
+        (*this)[i].setFilename(tmpMemberName);
 
-        // Read member data
-        tmpMemberBuf.resize(tmpMemberSize);
-        bytestream.read(tmpMemberBuf.data(), tmpMemberSize, tmpMemberOffset);
+        // Trick to resize current internal member buffer
+        (*this)[i].writePadding(0x0, tmpMemberSize);
 
-        tmpMemberBytestream.write(tmpMemberBuf.data(), tmpMemberSize);
+        // Read member data to current member
+        bytestream.read((*this)[i].getBuf(), tmpMemberSize, tmpMemberOffset);
+        (*this)[i].seek(0x0); // Make sure we don't run out of characters to read for future use
 
         // Go back to the next member metadata
         bytestream.seek(tmpSeekbackPos);
-
-        this->push_back(tmpMemberBytestream);
-
-        tmpMemberBytestream.reset();
-        tmpMemberBuf.clear();
     }
+
+    bytestream.seek(0x0);
 }
 
 void Arcv::readNmrCompArcv(giga::Bytestream& bytestream) {
+    // Go to the start of useful LZS data
     bytestream.seek(0x8);
 
+    // Get compressed and uncompressed file sizes
     std::uint32_t compSize = bytestream.readScalar<std::uint32_t>();
     std::uint32_t uncompSize = bytestream.readScalar<std::uint32_t>();
 
+    // Read our compressed buffer
     std::vector<std::uint8_t> compBuf(compSize);
     bytestream.read(compBuf.data(), compSize);
 
+    // Decompress the compressed buffer
     std::vector<std::uint8_t> uncompBuf(uncompSize);
     giga::lzss::decompress(compBuf.data(), compSize, uncompBuf.data(), uncompSize, giga::lzss::Config{12, 4});
 
+    // Write our uncompressed buffer to the output bytestream
     bytestream.reset();
-
     bytestream.write(uncompBuf.data(), uncompSize);
 
+    // Go back to where we left off at openFile
+    // so we can read the uncompressed buffer instead
     bytestream.seek(0x4);
 }
 
 void Arcv::finalizeFile(const std::string& filename, bool isCompressed, Version version) {
+    this->setFilename(filename);
+
     giga::Bytestream bytestream;
     bytestream.setEndianness(giga::endian::Endianness::Little);
 
     switch(version) {
         case Version::NMBC:
             break;
-        
+
         case Version::NMR:
             if(!isCompressed) {
                 writeNmrUncompArcv(bytestream);
@@ -156,43 +166,41 @@ void Arcv::finalizeFile(const std::string& filename, bool isCompressed, Version 
 }
 
 void Arcv::writeNmrUncompArcv(giga::Bytestream& bytestream) {
-    bytestream.write(reinterpret_cast<const std::uint8_t*>("VCRA"), 4);
-    bytestream.writeScalar<std::uint32_t>(this->size());
-    bytestream.write(reinterpret_cast<const std::uint8_t*>("TSIZ"), 4); // Temporary size
-    bytestream.writeScalar<std::uint32_t>(0);
-    bytestream.write(reinterpret_cast<const std::uint8_t*>("\5\2\7 "), 4);
-    bytestream.writePadding(0, 0x2c);
+    // Write ARCV header
+    bytestream.write(reinterpret_cast<const std::uint8_t*>("VCRA"), 0x4);
+    bytestream.writeScalar<std::uint32_t>(this->size()); // Member count
+    bytestream.write(reinterpret_cast<const std::uint8_t*>("TSIZ"), 0x4); // Temporary file size
+    bytestream.writeScalar<std::uint32_t>(0x0); // Unused; presumably the compressed file size if this were like a NMBC .bin
+    bytestream.write(reinterpret_cast<const std::uint8_t*>("\5\2\7 "), 0x4); // This weird number found in every ARCV
+    bytestream.writePadding(0x0, 0x2c); // Write the rest of the header padding
 
+    // Write ARCV member metadata
     for(std::size_t i = 0; i < this->size(); i++) {
-        bytestream.write(reinterpret_cast<const std::uint8_t*>("TOFF"), 4); // Temporary member offset
+        bytestream.write(reinterpret_cast<const std::uint8_t*>("TOFF"), 0x4); // Temporary member offset
         bytestream.writeScalar<std::uint32_t>((*this)[i].getSize());
-        bytestream.writeString((*this)[i].getFilename(), 0, 0x38);
+        bytestream.writeString((*this)[i].getFilename(), 0x00, 0x38); // Member filenames are kept at 0x38 characters
     }
 
+    // Write ARCV member data
     std::size_t tmpMemberOffset;
-    std::size_t tmpSeekbackPos;
     for(std::size_t i = 0; i < this->size(); i++) {
-        tmpMemberOffset = 0;
-        tmpSeekbackPos = 0;
-
         tmpMemberOffset = bytestream.getPos();
 
         bytestream.write((*this)[i].getBuf(), (*this)[i].getSize());
 
+        // Write the padding to make member data aligned to 0x40
+        // due to a restriction in the Wii filesystem
         while((bytestream.getPos() % 0x40)) {
             bytestream.writeScalar<std::uint8_t>(0xa3);
-        };
+        }
 
-        tmpSeekbackPos = bytestream.getPos();
-
-        bytestream.seek(0x40 + (i * 0x40));
-        bytestream.writeScalar<std::uint32_t>(tmpMemberOffset);
-
-        bytestream.seek(tmpSeekbackPos);
+        bytestream.writeScalar<std::uint32_t>(tmpMemberOffset, sizeof(std::uint32_t), 0x40 + (i * 0x40));
     }
 
-    bytestream.seek(0x8);
-    bytestream.writeScalar<std::uint32_t>(bytestream.getSize());
+    // Write ARCV size at the end
+    bytestream.writeScalar<std::uint32_t>(bytestream.getSize(), sizeof(std::uint32_t), 0x8);
+
+    bytestream.seek(0x0);
 }
 
 void Arcv::writeNmrCompArcv(giga::Bytestream& bytestream) {
@@ -212,6 +220,8 @@ void Arcv::writeNmrCompArcv(giga::Bytestream& bytestream) {
     bytestream.writeScalar<std::uint32_t>(newCompBufSize);
     bytestream.writeScalar<std::uint32_t>(uncompBuf.size());
     bytestream.write(compBuf.data(), newCompBufSize);
+
+    bytestream.seek(0x0);
 }
 
 } // namespace unpac
