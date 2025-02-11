@@ -40,7 +40,8 @@ public:
             CameraMoveUp(&camera, -cameraSpeed * GetFrameTime());
         }
         if(IsKeyDown(KEY_E)) {
-            CameraMoveUp(&camera, cameraSpeed * GetFrameTime());
+            CameraMoveUp(&camera, cameraSpeed * GetFrameTime());std::uint32_t imageStartOff = std::abs(outerBrresOffset) + offsets[0];
+    bytestream.seek(imageStartOff);
         }
 
         if(IsKeyDown(KEY_LEFT)) {
@@ -66,7 +67,6 @@ private:
     Camera camera = {{2, 2, 2}, cameraFocus, {0, 1, 0}, 60, CAMERA_PERSPECTIVE};
 };
 
-// kuk och bollar
 int main(int argc, char** argv) {
     if(argc < 3) {
 usage:
@@ -239,10 +239,12 @@ usage:
             unpac::Brres::Tex0 tex0;
             tex0.openBytestream(member);
 
+            float scale = (1024.0f / (float)tex0.getWidth());
+
             if(tex0.getFormat() == unpac::Brres::Tex0::Format::RGBA32) {
                 if(argc == 4) {
                     if(argv[3][0] == 'p') {
-                        InitWindow(800, 600, "brres test");
+                        InitWindow(1024, 1024, "brres test");
 
                         Image image;
                         image.data = tex0.getPixelBuf();
@@ -257,8 +259,7 @@ usage:
                             BeginDrawing();
                                 ClearBackground(BLACK);
 
-                                DrawTextureEx(texture, {0, 0}, 0, 2, WHITE);
-                                //DrawTexture(texture, 0, 0, WHITE);
+                                DrawTextureEx(texture, {0, 0}, 0, scale, WHITE);
                             EndDrawing();
                         }
                         CloseWindow();

@@ -91,7 +91,7 @@ void ItemSet::openFile(const std::string& filename) {
 }
 
 void ItemSet::openBytestream(giga::Bytestream& bytestream) {
-    bytestream.setEndianness(giga::endian::Endianness::Big);
+    bytestream.setEndianness(giga::Endianness::Big);
 
     std::size_t itemCount = bytestream.getSize() / 0x30;
     this->resize(itemCount);

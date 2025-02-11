@@ -3,6 +3,7 @@
 
 #include <string>
 #include <giga/archive.h>
+#include <giga/bytestream.h>
 
 namespace unpac {
 
@@ -16,8 +17,11 @@ public:
     void openFile(const std::string& filename, Version version = Version::NMR);
     void finalizeFile(const std::string& filename, bool isCompressed = true, Version version = Version::NMR);
 private:
+
+    // NMBC
     void readNmbcUncompArcv(giga::Bytestream& bytestream);
 
+    // NMR
     void readNmrUncompArcv(giga::Bytestream& bytestream);
     void readNmrCompArcv(giga::Bytestream& bytestream);
     void writeNmrUncompArcv(giga::Bytestream& bytestream);

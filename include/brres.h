@@ -49,7 +49,7 @@ public:
 
     private:
         void openTex0HeaderBytestream(giga::Bytestream& bytestream);
-        void resolveOffsets(giga::Bytestream& bytestream);
+        std::uint32_t resolveOffsets(giga::Bytestream& bytestream);
         void parseImageData(giga::Bytestream& bytestream);
 
         bool _usesPalette = false;

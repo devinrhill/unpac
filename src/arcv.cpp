@@ -10,7 +10,7 @@ namespace unpac {
 
 void Arcv::openFile(const std::string& filename, Version version) {
     giga::Bytestream bytestream;
-    bytestream.setEndianness(giga::endian::Endianness::Little);
+    bytestream.setEndianness(giga::Endianness::Little);
     bytestream.openFile(filename);
 
     char magic[4];
@@ -145,7 +145,7 @@ void Arcv::finalizeFile(const std::string& filename, bool isCompressed, Version 
     this->setFilename(filename);
 
     giga::Bytestream bytestream;
-    bytestream.setEndianness(giga::endian::Endianness::Little);
+    bytestream.setEndianness(giga::Endianness::Little);
 
     switch(version) {
         case Version::NMBC:

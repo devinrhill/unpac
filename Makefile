@@ -3,7 +3,7 @@ DEBUG := 1
 
 CXX := g++
 CXXFLAGS := -std=c++20 -Iinclude $(if $(DEBUG),-Wall -Wextra -pedantic -g,-O3)
-LDFLAGS := -lfmt -lgiga -lm -lraylib
+LDFLAGS := -lgiga -lm -lraylib
 TARGET := unpac
 MODULES := arcv brres g03_item_set main
 
@@ -19,7 +19,7 @@ $(OBJECTS): $(OBJECTDIR)/%.o: $(SOURCEDIR)/%.cpp
 	$(CXX) $< $(CXXFLAGS) -c -o $@
 
 $(TARGET): $(OBJECTS)
-	$(CXX) $^ $(LDFLAGS) -o $(TARGET)
+	$(CXX) $(OBJECTS) $(LDFLAGS) -o $@
 
 install: $(TARGET)
 	cp $(TARGET) /usr/bin
