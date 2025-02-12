@@ -20,6 +20,15 @@ public:
         std::int32_t nameOffset;
     };
 
+    class Plt0: private Resource {
+    public:
+        enum class Format: std::uint32_t {
+            IA8 = 0x0,
+            RGB565 = 0x1,
+            RGB5A3 = 0x2
+        };
+    };
+
     class Tex0: private Resource {
     public:
         enum class Format: std::uint32_t {
@@ -29,7 +38,7 @@ public:
             IA8 = 0x3,
             RGB565 = 0x4,
             RGB5A3 = 0x5,
-            RGBA32 = 0x6,
+            RGBA8 = 0x6,
             C4 = 0x8,
             C8 = 0x9,
             C14X2 = 0xa,
@@ -50,12 +59,13 @@ public:
     private:
         void openTex0HeaderBytestream(giga::Bytestream& bytestream);
         std::uint32_t resolveOffsets(giga::Bytestream& bytestream);
+        giga::Bytestream resolveBlocks(giga::Bytestream& bytestream, Format format);
         void parseImageData(giga::Bytestream& bytestream);
 
         bool _usesPalette = false;
         std::uint16_t _width = 0;
         std::uint16_t _height = 0;
-        Format _format = Format::RGBA32;
+        Format _format = Format::RGBA8;
         std::uint32_t _mipmapCount;
         std::vector<std::uint8_t> _pixelBuf;
         std::vector<std::vector<std::uint8_t>> _mipmapPixelBufs;

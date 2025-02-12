@@ -140,7 +140,9 @@ void Brres::Tex0::parseImageData(giga::Bytestream& bytestream) {
 
             break;
         } */
-        case Format::RGBA32: {
+        case Format::RGBA8: {
+            blocks = this->resolveBlocks();
+
             Bpp = 4;
             blockCount = (_width * _height * Bpp) / 0x40;
 
@@ -204,6 +206,56 @@ void Brres::Tex0::parseImageData(giga::Bytestream& bytestream) {
     }
 }
 
+giga::Bytestream Brres::Tex0::resolveBlocks(giga::Bytestream& bytestream, Format format) {
+    switch(format) {
+        case Format::RGBA8: {
+            giga::Bytestream blocks;
+            std::uint8_t tmpPixel[0x4];
+
+            std::uint8_t tmpCodedBlock[0x40];
+            std::uint8_t tmpBlock[0x40];
+
+
+            giga::uint Bpp = 4;
+            giga::uint blockCount = (_width * _height * Bpp) / 0x40;
+
+            blocks.writePadding(0x0, blockCount * 0x40);
+            blocks.seek(0x0);
+
+            giga::uint n, m;
+            // for each block
+            for(giga::uint j = 0; j < blockCount; j++) {
+                n = 0;
+
+                // read block data
+                bytestream.read(tmpCodedBlock, 0x40);
+
+                // for each 16 pixels
+                for(giga::uint k = 0; k < 0x10; k++) {
+                    tmpPixel[0] = tmpCodedBlock[(k * 2) + 0x1];
+                    tmpPixel[1] = tmpCodedBlock[(k * 2) + 0x20];
+                    tmpPixel[2] = tmpCodedBlock[(k * 2) + 0x21];
+                    tmpPixel[3] = tmpCodedBlock[(k * 2)];
+
+                    // std::cout << std::format("{:02x}{:02x}{:02x}{:02x}", tmpPixel[0], tmpPixel[1], tmpPixel[2], tmpPixel[3]) << std::endl;
+
+                    for(m = 0; m < 0x4; m++) {
+                        tmpBlock[(n * 0x4) + m] = tmpPixel[m];
+                    }
+                    n++;
+
+                }
+                blocks.write(tmpBlock, 0x40);
+            }
+
+            _pixelBuf.resize(_width * _height * Bpp, 0);
+
+
+            break;
+        }
+    }
+}
+
 bool Brres::Tex0::getPaletteUsage() const noexcept {
     return _usesPalette;
 }
@@ -234,8 +286,8 @@ const char* Brres::Tex0::getFormatName() const noexcept {
             return "RGB565";
         } case Format::RGB5A3: {
             return "RGB5A3";
-        } case Format::RGBA32: {
-            return "RGBA32";
+        } case Format::RGBA8: {
+            return "RGBA8";
         } case Format::C4: {
             return "C4";
         } case Format::C8: {

@@ -1,3 +1,5 @@
 unpac
 build/*
 tests
+_nmrj*
+nmrj*
