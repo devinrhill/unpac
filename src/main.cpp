@@ -9,7 +9,7 @@
 // #include "brres.h"
 #include "g03_item_set.h"
 
-constexpr float VERSION = 1.6;
+constexpr float VERSION = 1.7;
 
 #define NDEBUG 1
 
@@ -69,10 +69,12 @@ private:
 #endif
 
 int main(int argc, char **argv) {
+  bool quiet = false;
+
   if (argc < 3) {
   usage:
     std::cerr << "Unpac by lvlrk, v" << VERSION << std::endl;
-    std::cerr << "Usage: unpac <x|c|d|C|L|m> <filename>" << std::endl;
+    std::cerr << "Usage: unpac [-q] <x|c|d|C|L|m> <filename>" << std::endl;
 #if !NDEBUG
     std::cerr << "DEBUG MODE" << std::endl;
 #endif
@@ -80,28 +82,39 @@ int main(int argc, char **argv) {
   }
 
   std::string program = argv[1];
+  int aidx = 0;
+
+  if(program == "-q" || program == "--quiet") {
+    quiet = true;
+    aidx++;
+    program = argv[2];
+  }
 
   if (argc >= 3) {
     std::string input, output;
 
     unpac::Arcv arcv;
     if (program == "x") {
-      input = argv[2];
+      input = argv[2+aidx];
       output = std::filesystem::path(input).parent_path() /
                std::filesystem::path(input).stem();
 
-      std::cout << std::format("extract: {} -> {}\n", input, output);
+      if(!quiet) {
+        std::cout << std::format("extract: {} -> {}\n", input, output);
+      }
 
       arcv.openFile(input);
       arcv.extractAll(output);
 
       return 0;
     } else if (program == "c") {
-      input = argv[2];
-      output = std::filesystem::path(argv[2]).parent_path() /
-               std::filesystem::path(std::string(argv[2]) + ".lzs");
+      input = argv[2+aidx];
+      output = std::filesystem::path(argv[2+aidx]).parent_path() /
+               std::filesystem::path(std::string(argv[2+aidx]) + ".lzs");
 
-      std::cout << std::format("create: {} -> {}\n", input, output);
+      if(!quiet) {
+        std::cout << std::format("create: {} -> {}\n", input, output);
+      }
 
       arcv.injectDirectory(input);
       arcv.finalizeFile(output, true);
@@ -114,20 +127,24 @@ int main(int argc, char **argv) {
 
       return 0;
     } else if (program == "d") {
-      input = argv[2];
+      input = argv[2+aidx];
       output = std::filesystem::path(input).stem().string() + ".arc";
 
-      std::cout << std::format("decompress: {} -> {}\n", input, output);
+      if(!quiet) {
+        std::cout << std::format("decompress: {} -> {}\n", input, output);
+      }
 
       arcv.openFile(input);
       arcv.finalizeFile(output, false);
 
       return 0;
     } else if (program == "C") {
-      input = argv[2];
+      input = argv[2+aidx];
       output = std::filesystem::path(input).stem().string() + ".lzs";
 
-      std::cout << std::format("compress: {} -> {}\n", input, output);
+      if(!quiet) {
+        std::cout << std::format("compress: {} -> {}\n", input, output);
+      }
 
       giga::Bytestream inBytestream;
       inBytestream.openFile(input);
@@ -153,9 +170,11 @@ int main(int argc, char **argv) {
 
       return 0;
     } else if (program == "L") {
-      input = argv[2];
+      input = argv[2+aidx];
 
-      std::cout << std::format("list: {}\n", input);
+      if(!quiet) {
+        std::cout << std::format("list: {}\n", input);
+      }
 
       arcv.openFile(input);
       for (const giga::Bytestream &bytestream : arcv) {
@@ -164,10 +183,12 @@ int main(int argc, char **argv) {
 
       return 0;
     } else if (program == "m") {
-      input = argv[2];
-      output = std::string(argv[2]) + ".arc";
+      input = argv[2+aidx];
+      output = std::string(argv[2+aidx]) + ".arc";
 
-      std::cout << std::format("create: {} -> {}\n", input, output);
+      if(!quiet) {
+        std::cout << std::format("create: {} -> {}\n", input, output);
+      }
 
       arcv.injectDirectory(input);
       arcv.finalizeFile(output, false);
@@ -177,7 +198,7 @@ int main(int argc, char **argv) {
     }
 #elif !NDEBUG
     } else if (program == "test") {
-      std::string input = argv[2];
+      std::string input = argv[2+aidx];
 
       unpac::Arcv arcv;
       arcv.openFile(input);
@@ -205,7 +226,7 @@ int main(int argc, char **argv) {
 
       return 0;
     } else if (program == "P") {
-      input = argv[2];
+      input = argv[2+aidx];
 
       arcv.openFile(input);
 
@@ -249,7 +270,7 @@ int main(int argc, char **argv) {
       return 0;
     } else if (program == "b") {
       /*
-      input = argv[2];
+      input = argv[2+aidx];
 
       giga::Bytestream member;
       member.openFile(input);
@@ -262,8 +283,8 @@ int main(int argc, char **argv) {
       float scale = (1024.0f / (float)tex0.getWidth());
 
       if(tex0.getFormat() == unpac::Brres::Tex0::Format::RGBA32) {
-          if(argc == 4) {
-              if(argv[3][0] == 'p') {
+          if(argc >= 4) {
+              if(argv[3+aidx][0] == 'p') {
                   InitWindow(1024, 1024, "brres test");
 
                   Image image;
@@ -295,7 +316,7 @@ int main(int argc, char **argv) {
       */
     } else if (program == "T") {
       /*
-      input = argv[2];
+      input = argv[2+aidx];
 
       giga::Bytestream file;
       file.openFile(input);

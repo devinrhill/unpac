@@ -33,3 +33,13 @@ target_include_directories(unpac
 )
 
 target_link_libraries(unpac PRIVATE giga)
+
+install(TARGETS unpac
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
+    PUBLIC_HEADER DESTINATION include
+    ARCHIVE DESTINATION lib
+)
+
+install(TARGETS unpac
+    RUNTIME DESTINATION bin)
