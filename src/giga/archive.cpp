@@ -30,14 +30,17 @@ void Archive::injectDirectory(const std::string& directoryName) {
 }
 
 void Archive::extract(const std::string& filename, const std::string& directoryName) {
-    std::filesystem::create_directory(directoryName);
+    std::filesystem::create_directories(directoryName);
 
     std::string tmpPath;
     for(Bytestream& bytestream: *this) {
         if(bytestream.getFilename() == filename) {
-            std::filesystem::create_directory(std::filesystem::path(filename).parent_path());
+            std::filesystem::path rel = std::filesystem::path(filename).parent_path();
+            std::filesystem::path fullDir = directoryName / rel;
 
-            tmpPath = std::filesystem::path(directoryName) / std::filesystem::path(filename);
+            std::filesystem::create_directories(fullDir);
+
+            tmpPath = (std::filesystem::path(directoryName) / std::filesystem::path(filename)).string();
 
             bytestream.finalizeFile(tmpPath);
 
@@ -53,9 +56,9 @@ void Archive::extractAll(const std::string& directoryName) {
     for(Bytestream& bytestream: *this) {
         tmpPath = std::filesystem::path(directoryName) / std::filesystem::path(bytestream.getFilename());
 
-        std::filesystem::create_directory(tmpPath.parent_path());
+        std::filesystem::create_directories(tmpPath.parent_path());
         
-        bytestream.finalizeFile(tmpPath);
+        bytestream.finalizeFile(tmpPath.string());
     }
 }
 

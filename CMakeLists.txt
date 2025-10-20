@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.21)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-project(unpac CXX)
+project(unpac)
 
-add_library(giga SHARED
+add_library(giga STATIC
     src/giga/app.cpp
     src/giga/archive.cpp
     src/giga/bytestream.cpp
