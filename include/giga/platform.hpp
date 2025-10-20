@@ -8,7 +8,7 @@
 #endif
 
 #if (defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER))
-#define IS_WINDOWS
+#define IS_WINDOWS 1
 #endif
 
 namespace giga {

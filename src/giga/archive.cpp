@@ -15,7 +15,7 @@ void Archive::inject(const std::string& filename) {
 
             giga::Bytestream bytestream;
             bytestream.openFile(filename);
-            bytestream.setFilename(path.filename());
+            bytestream.setFilename(path.filename().string());
             // std::cout << std::format("{}\n{}\n\n", path.string(), bytestream.getFilename());
 
             this->push_back(bytestream);
@@ -25,7 +25,7 @@ void Archive::inject(const std::string& filename) {
 
 void Archive::injectDirectory(const std::string& directoryName) {
     for(const auto& directoryEntry: std::filesystem::recursive_directory_iterator(directoryName)) {
-        inject(directoryEntry.path());
+        inject(directoryEntry.path().string());
     }
 }
 
