@@ -1,13 +1,14 @@
 #ifndef UNPAC_BRRES_H
 #define UNPAC_BRRES_H
 
-#include <giga/archive.h>
-#include <giga/bytestream.h>
+#include "giga/archive.hpp"
+#include "giga/bytestream.hpp"
 
 namespace unpac {
 
 class Brres: public giga::Archive {
 public:
+    /*
     class Resource {
     public:
         void openHeaderFile(const std::string& filename);
@@ -69,8 +70,9 @@ public:
         std::uint32_t _mipmapCount;
         std::vector<std::uint8_t> _pixelBuf;
         std::vector<std::vector<std::uint8_t>> _mipmapPixelBufs;
-    };
+    };*/
 
+    void openBytestream(giga::Bytestream& bytestream);
     void openFile(const std::string& filename);
 };
 

@@ -1,7 +1,7 @@
 #ifndef UNPAC_G03_ITEM_SET_H
 #define UNPAC_G03_ITEM_SET_H
 
-#include <giga/bytestream.h>
+#include "giga/bytestream.hpp"
 
 namespace unpac {
 namespace g03 {

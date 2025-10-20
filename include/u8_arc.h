@@ -2,7 +2,7 @@
 #define UNPAC_U8_ARC
 
 #include <string>
-#include <giga/archive.h>
+#include "giga/archive.hpp"
 
 namespace unpac {
 

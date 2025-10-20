@@ -1,4 +1,4 @@
-#include <giga/bytestream.h>
+#include "giga/bytestream.hpp"
 #include <string>
 #include "nmr_save.h"
 

@@ -2,8 +2,8 @@
 #define UNPAC_ARCV_H
 
 #include <string>
-#include <giga/archive.h>
-#include <giga/bytestream.h>
+#include "giga/archive.hpp"
+#include "giga/bytestream.hpp"
 
 namespace unpac {
 
@@ -16,8 +16,8 @@ public:
 
     void openFile(const std::string& filename, Version version = Version::NMR);
     void finalizeFile(const std::string& filename, bool isCompressed = true, Version version = Version::NMR);
-private:
 
+private:
     // NMBC
     void readNmbcUncompArcv(giga::Bytestream& bytestream);
 

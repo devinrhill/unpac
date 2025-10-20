@@ -1,5 +1,5 @@
-#include <giga/bytestream.h>
-#include <giga/types.h>
+#include "giga/bytestream.hpp"
+#include "giga/types.hpp"
 #include <format>
 #include <iostream>
 #include <string>
@@ -310,10 +310,7 @@ std::uint8_t* Brres::Tex0::getPixelBuf() const {
     return const_cast<std::uint8_t*>(_pixelBuf.data());
 }
 
-void Brres::openFile(const std::string& filename) {
-    giga::Bytestream bytestream;
-    bytestream.openFile(filename);
-
+void Brres::openBytestream(giga::Bytestream& bytestream) {
     char magic[4];
     bytestream.read(reinterpret_cast<std::uint8_t*>(magic), 4);
 
@@ -330,6 +327,13 @@ void Brres::openFile(const std::string& filename) {
     bytestream.seek(0x8);
 
     // std::uint32_t fileSize = bytestream.readScalar<std::uint32_t>();
+}
+
+void Brres::openFile(const std::string& filename) {
+    giga::Bytestream bytestream;
+    bytestream.openFile(filename);
+
+    this->openBytestream(bytestream);
 }
 
 } // namespace unpac

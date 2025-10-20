@@ -1,4 +1,4 @@
-#include <giga/bytestream.h>
+#include "giga/bytestream.hpp"
 #include <string>
 #include "brsar.h"
 

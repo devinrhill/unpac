@@ -1,5 +1,5 @@
-#include <giga/bytestream.h>
-#include <giga/endianness.h>
+#include "giga/bytestream.hpp"
+#include "giga/endianness.hpp"
 #include <iostream>
 #include <cstdio>
 #include "g03_item_set.h"

@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include <string>
-#include <giga/bytestream.h>
+#include "giga/bytestream.hpp"
 
 namespace unpac {
 

@@ -1,5 +1,5 @@
 unpac
-build/*
+unpac.exe
+build
 tests
-_nmrj*
-nmrj*
+STYLE.md # why is this included in the repo
