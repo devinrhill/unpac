@@ -32,7 +32,7 @@ void Archive::extract(const std::string& filename, const std::string& directoryN
 
     for(Bytestream& bytestream: *this) {
         if(bytestream.getFilename() == filename) {
-            bytestream.finalizeFile(std::filesystem::path(directoryName) / std::filesystem::path(filename).string());
+            bytestream.finalizeFile((std::filesystem::path(directoryName) / std::filesystem::path(filename)).string());
 
             break;
         }
