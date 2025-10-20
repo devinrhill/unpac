@@ -96,8 +96,7 @@ int main(int argc, char **argv) {
     unpac::Arcv arcv;
     if (program == "x") {
       input = argv[2+aidx];
-      output = (std::filesystem::path(input).parent_path() /
-               std::filesystem::path(input).stem()).string();
+      output = argv[3+aidx];
 
       if(!quiet) {
         std::cout << std::format("extract: {} -> {}\n", input, output);
@@ -109,8 +108,7 @@ int main(int argc, char **argv) {
       return 0;
     } else if (program == "c") {
       input = argv[2+aidx];
-      output = (std::filesystem::path(argv[2+aidx]).parent_path() /
-               std::filesystem::path(std::string(argv[2+aidx]) + ".lzs")).string();
+      output = argv[3+aidx];
 
       if(!quiet) {
         std::cout << std::format("create: {} -> {}\n", input, output);
@@ -128,7 +126,7 @@ int main(int argc, char **argv) {
       return 0;
     } else if (program == "d") {
       input = argv[2+aidx];
-      output = std::filesystem::path(input).stem().string() + ".arc";
+      output = argv[3+aidx];
 
       if(!quiet) {
         std::cout << std::format("decompress: {} -> {}\n", input, output);
@@ -140,7 +138,7 @@ int main(int argc, char **argv) {
       return 0;
     } else if (program == "C") {
       input = argv[2+aidx];
-      output = std::filesystem::path(input).stem().string() + ".lzs";
+      output = argv[3+aidx];
 
       if(!quiet) {
         std::cout << std::format("compress: {} -> {}\n", input, output);
@@ -184,7 +182,7 @@ int main(int argc, char **argv) {
       return 0;
     } else if (program == "m") {
       input = argv[2+aidx];
-      output = std::string(argv[2+aidx]) + ".arc";
+      output = argv[3+aidx];
 
       if(!quiet) {
         std::cout << std::format("create: {} -> {}\n", input, output);

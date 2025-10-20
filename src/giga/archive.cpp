@@ -11,12 +11,10 @@ void Archive::inject(const std::string& filename) {
     struct stat st;
     if(!stat(filename.c_str(), &st)) {
         if(st.st_mode & S_IFREG) {
-            std::filesystem::path path = std::filesystem::path(filename).relative_path();
-
             giga::Bytestream bytestream;
             bytestream.openFile(filename);
-            bytestream.setFilename(path.filename().string());
-            // std::cout << std::format("{}\n{}\n\n", path.string(), bytestream.getFilename());
+
+            bytestream.setFilename(std::filesystem::path(filename).relative_path().string());
 
             this->push_back(bytestream);
         }
@@ -32,17 +30,9 @@ void Archive::injectDirectory(const std::string& directoryName) {
 void Archive::extract(const std::string& filename, const std::string& directoryName) {
     std::filesystem::create_directories(directoryName);
 
-    std::string tmpPath;
     for(Bytestream& bytestream: *this) {
         if(bytestream.getFilename() == filename) {
-            std::filesystem::path rel = std::filesystem::path(filename).parent_path();
-            std::filesystem::path fullDir = directoryName / rel;
-
-            std::filesystem::create_directories(fullDir);
-
-            tmpPath = (std::filesystem::path(directoryName) / std::filesystem::path(filename)).string();
-
-            bytestream.finalizeFile(tmpPath);
+            bytestream.finalizeFile(std::filesystem::path(directoryName) / std::filesystem::path(filename).string());
 
             break;
         }
@@ -50,7 +40,7 @@ void Archive::extract(const std::string& filename, const std::string& directoryN
 }
 
 void Archive::extractAll(const std::string& directoryName) {
-    std::filesystem::create_directory(directoryName);
+    std::filesystem::create_directories(directoryName);
 
     std::filesystem::path tmpPath;
     for(Bytestream& bytestream: *this) {
